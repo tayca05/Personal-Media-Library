@@ -1,6 +1,6 @@
 <template>
     <div class="media-list">
-        <li v-for="item in filterItems" :key="item.id" class="media-item">
+        <li v-for="item in items" :key="item._id" class="media-item">
             <div class="media-image"></div> <!--Image PlaceHolder For Now-->
             <div class="media-details">
                 <h3>{{ item.title }}</h3>
@@ -12,26 +12,11 @@
 </template>
 
 <script setup>
-    import { ref, computed } from 'vue';
     import { defineProps } from 'vue';
 
     const props = defineProps({ // movie, music, books
-        type: String
+        items: Array
     })
-
-    const allItems = ref([ // hardcoded data to test just for now
-        { id: 1, title: 'Inception', type: 'movie' },
-        { id: 2, title: 'Bohemian Rhapsody', type: 'music' },
-        { id: 3, title: '1984', type: 'books' },
-        { id: 4, title: 'Pride & Prejudice', type: 'books' }
-
-    ])
-
-    const filterItems = computed(() => {
-        // filters item based on the type of the prop (movie, music, book)
-        return allItems.value.filter(item => item.type === props.type); 
-    })
-    
 </script>
 
 <style>

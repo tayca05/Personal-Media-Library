@@ -3,11 +3,6 @@ const express = require('express');
 const router = express.Router(); // app for the routes
 const mediaItem = require('../models/media_item'); // the database model
 
-// testing if route works
-router.get('/', (req, res) => {
-    res.send('Router works for media!');
-})
-
 // CREATE
 router.post('/', async (req, res) => {
     try {
