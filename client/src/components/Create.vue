@@ -66,7 +66,7 @@
                     type: type.value,
                     title: title.value,
                     genre: genre.value,
-                    rate: rate.value,
+                    rating: rate.value,
                     notes:  notes.value
                 })
             });

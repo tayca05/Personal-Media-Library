@@ -27,6 +27,19 @@ router.get('/', async (req, res) => {
     }
 })
 
+// READ BY ID
+router.get('/:id', async (req, res) => {
+    try {
+        const item = await mediaItem.findById(req.params.id);
+        if (!item) {
+            res.status(404).json({message: 'Item not found.'});
+        }
+        res.json(item);
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
+})
+
 // UPDATE
 router.put('/:id', async (req, res) => { // updating the item with the specific id
     try {

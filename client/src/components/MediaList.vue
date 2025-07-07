@@ -3,7 +3,9 @@
         <li v-for="item in items" :key="item._id" class="media-item">
             <div class="media-image"></div> <!--Image PlaceHolder For Now-->
             <div class="media-details">
-                <h3>{{ item.title }}</h3>
+                <router-link :to="`/item/${item._id}`">
+                    <h3>{{ item.title }}</h3>
+                </router-link>
                 <p>{{ item.genre }}</p>
                 <p>{{ item.notes }}</p>
             </div>
@@ -61,6 +63,10 @@
     margin: 0;
     font-size: 1.2rem;
     color: #333;
+}
+
+.media-details h3:hover {
+    text-decoration: underline;
 }
 
 .media-details p {
