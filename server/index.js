@@ -10,6 +10,8 @@ const app = express();
 app.use(express.json()); 
 app.use(cors()); // allows Vue to call the server
 
+app.use('/uploads', express.static('uploads')); // let Vue access images
+
 const mediaRoutes = require('./routes/media'); // the router
 app.use('/api/media', mediaRoutes);
 

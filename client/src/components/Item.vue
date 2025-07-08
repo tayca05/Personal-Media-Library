@@ -4,9 +4,9 @@
         <div v-else-if="loading"><Loading class=""></Loading></div>
         <div v-else class="item">
             <span>
-                <img src="" alt="" class="item-image">
+                <img :src="`http://localhost:3000/${item.image}`" alt="" class="item-image">
             </span>
-            <div>
+            <div class="item-details">
                 <div class="item-info">
                     <h2>{{ item.title }}</h2> <!--Displaying current item-->
                     <p>{{ item.genre }}</p>
@@ -14,8 +14,8 @@
                     <p>Rating: {{ item.rating }}</p>
                 </div>
                 <div class="UD-buttons">
-                    <button>Update</button>
-                    <button>Delete</button>
+                    <button @click="updateItem()">Update</button>
+                    <button @click="deleteItem()">Delete</button>
                 </div>
             </div>
         </div>
@@ -27,12 +27,13 @@
     import { useRoute, useRouter } from 'vue-router';
 
     const route = useRoute();
-    const router = useRoute();
+    const router = useRouter();
 
     const id = route.params.id;
     const item = ref({});
     const loading = ref(true);
     const error = ref('');
+    const edit = ref(false)
 
     onMounted (async() => {
         try {
@@ -48,6 +49,38 @@
             loading.value = false;
         }
     })   
+
+    async function deleteItem() {
+        try {
+            const response = await fetch(`http://localhost:3000/api/media/${id}`, { method: 'DELETE' });
+            if (!response.ok) {
+                throw new Error('Failed to delete item.');
+            }
+            router.push(`/${item.value.type}`); // go back to main page
+        } catch (err) {
+            error.value = err.message;   
+        }
+    }
+
+    async function updateItem() {
+        try {
+            const response = await fetch(`http://localhost:3000/api/media/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(item.value)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update items.')
+            }
+
+            edit.value = false;
+        } catch (err) {
+            error.value = err.message;
+        } finally {
+            loading.value = false;
+        }
+    }
 </script>
 
 <style>
@@ -62,7 +95,7 @@
         color: #333;
 
         display: flex;
-        gap: 100px;
+        gap: 4rem;
         align-items: center;
         justify-content: center;
 
@@ -71,7 +104,6 @@
     }
 
     .item-image {
-        background-color: #333;
         width: 320px;
         height: 320px;
     }
@@ -84,11 +116,14 @@
         background-color: #3c4e61;
         color: aliceblue;
         text-align: left;
+
+        width: 320px;
+        height: 200px;
     }
 
     .UD-buttons {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
+        justify-content: flex-end;
+        gap: 0.5rem;
     }
 </style>

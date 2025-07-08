@@ -34,6 +34,10 @@
             <label for="notes">Enter Notes:</label>
             <textarea type="text" id="notes" v-model="notes"></textarea>
         </div>
+        <div class="row">
+            <label for="image">Choose an image:</label>
+            <input type="file" @change="handleImage">
+        </div>
         <div>
             <button type="submit">Submit</button>
         </div>
@@ -42,12 +46,14 @@
 
 <script setup>
     import { ref } from 'vue';
+    import router from '../router';
 
     const type = ref('');
     const title = ref('');
     const genre = ref('');
     const rate = ref('');
     const notes = ref('');
+    const image = ref(null);
 
     const success = ref(false);
     const err = ref('');
@@ -57,24 +63,25 @@
         err.value = '';
 
         try {
+            const form = new FormData();
+            form.append('image', image.value);
+            form.append('type', type.value);
+            form.append('title', title.value);
+            form.append('genre', genre.value);
+            form.append('rating', rate.value);
+            form.append('notes', notes.value);
+
             const response = await fetch('http://localhost:3000/api/media', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    type: type.value,
-                    title: title.value,
-                    genre: genre.value,
-                    rating: rate.value,
-                    notes:  notes.value
-                })
+                body: form
             });
 
             // check if response status, whether it is between 200-299
             if (!response.ok) {
                 throw new Error("Failed to add item.");
             }
+
+            router.push(`/${type.value}`);
 
             success.value = true;
             type.value = '';
@@ -83,9 +90,14 @@
             rate.value = ''; // default rate
             notes.value = '';
 
+
         } catch (error) {
             err.value = error.message;
         }
+    }
+
+    async function handleImage(event) {
+        image.value = event.target.files[0];
     }
 </script>
 

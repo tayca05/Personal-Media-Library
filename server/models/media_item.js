@@ -10,7 +10,7 @@ const mediaSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['movie', 'book', 'music'],
+        enum: ['movie', 'books', 'music'],
         required: true
     },
     genre: {
@@ -30,8 +30,8 @@ const mediaSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    image: { // Absent for now
-        type: String,
+    image: { 
+        type: String
     }
 })
 

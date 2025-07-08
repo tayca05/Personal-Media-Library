@@ -1,7 +1,7 @@
 <template>
     <div class="media-list">
         <li v-for="item in items" :key="item._id" class="media-item">
-            <div class="media-image"></div> <!--Image PlaceHolder For Now-->
+            <img :src="`http://localhost:3000/${item.image}`" alt="" class="media-image">
             <div class="media-details">
                 <router-link :to="`/item/${item._id}`">
                     <h3>{{ item.title }}</h3>

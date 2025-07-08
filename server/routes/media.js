@@ -2,13 +2,33 @@
 const express = require('express');
 const router = express.Router(); // app for the routes
 const mediaItem = require('../models/media_item'); // the database model
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + ' ' + file.originalname);
+    }
+})
+
+const upload = multer({storage: storage});
 
 // CREATE
-router.post('/', async (req, res) => {
+router.post('/', upload.single('image'), async (req, res) => {
     try {
         console.log('New media item is here.', req.body);
-        const item = new mediaItem(req.body); // the new item created 
-        const savedItem = await item.save();
+        console.log('Image info: ', req.file);
+
+        const itemData = {
+            ...req.body,
+            image: req.file ? req.file.path : null
+        }
+
+        const item = new mediaItem(itemData); // the new item created 
+        const savedItem = await item.save();    
+
         console.log('Saved the new item.', savedItem);
         res.status(201).json(savedItem); // send the item back to the front end
     } catch (error) {

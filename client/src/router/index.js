@@ -9,7 +9,7 @@ import Item from '../components/Item.vue';
 
 const routes = [
     {path: '/', component: Main},
-    {path: '/movies', component: Movies},
+    {path: '/movie', component: Movies},
     {path: '/music', component: Music},
     {path: '/books', component: Books},
     {path: '/create', component: Create},
