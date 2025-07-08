@@ -7,14 +7,23 @@
                 <img :src="`http://localhost:3000/${item.image}`" alt="" class="item-image">
             </span>
             <div class="item-details">
-                <div class="item-info">
+                <div v-if="!edit" class="item-info">
                     <h2>{{ item.title }}</h2> <!--Displaying current item-->
-                    <p>{{ item.genre }}</p>
-                    <p>{{ item.notes }}</p>
+                    <p>Genre: {{ item.genre }}</p>
+                    <p>Notes: {{ item.notes }}</p>
                     <p>Rating: {{ item.rating }}</p>
+                </div>   
+                <div v-if="edit" class="item-info">
+                    <h2><input v-model="item.title" placeholder="Title" /></h2> 
+                    <p><input v-model="item.genre" placeholder="Genre" /></p>
+                    <p><textarea v-model="item.notes" placeholder="Notes"></textarea></p>
+                    <p><input v-model.number="item.rate" type="number" min="1" max="5" /></p>
                 </div>
                 <div class="UD-buttons">
-                    <button @click="updateItem()">Update</button>
+                    <button @click="goBack()">Go Back</button>
+                    <button v-if="edit" @click="updateItem">Save</button>
+                    <button v-else @click="startEditing()">Edit</button>
+                    <button v-if="edit" @click="cancelEdit">Cancel</button>
                     <button @click="deleteItem()">Delete</button>
                 </div>
             </div>
@@ -33,7 +42,8 @@
     const item = ref({});
     const loading = ref(true);
     const error = ref('');
-    const edit = ref(false)
+    const edit = ref(false);
+    let ogItem = null;
 
     onMounted (async() => {
         try {
@@ -49,6 +59,18 @@
             loading.value = false;
         }
     })   
+
+    async function startEditing() {
+        ogItem = JSON.parse(JSON.stringify(item.value));
+        edit.value = true;
+    }
+
+    async function cancelEdit() {
+        if (ogItem) {
+            item.value = JSON.parse(JSON.stringify(ogItem));
+        }
+        edit.value = false;
+    }
 
     async function deleteItem() {
         try {
@@ -80,6 +102,10 @@
         } finally {
             loading.value = false;
         }
+    }
+
+    async function goBack() {
+        router.push(`/${item.value.type}`); // go back to main page
     }
 </script>
 
@@ -119,6 +145,8 @@
 
         width: 320px;
         height: 200px;
+
+        overflow-y: auto;
     }
 
     .UD-buttons {

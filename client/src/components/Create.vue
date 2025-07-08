@@ -101,7 +101,7 @@
     }
 </script>
 
-<style scoped>
+<style>
     .container {
         max-width: 600px;
         padding: 1rem;

@@ -6,8 +6,6 @@
                 <router-link :to="`/item/${item._id}`">
                     <h3>{{ item.title }}</h3>
                 </router-link>
-                <p>{{ item.genre }}</p>
-                <p>{{ item.notes }}</p>
             </div>
         </li>
     </div>

@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router(); // app for the routes
 const mediaItem = require('../models/media_item'); // the database model
 const multer = require('multer');
+const fetch = require('node-fetch');
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -81,6 +82,21 @@ router.delete('/:id', async (req, res) => {
         res.status(201).json({message: 'Item deleted successfully'});
     } catch (error) {
         res.status(500).json({message: error.message})
+    }
+})
+
+// SEARCH
+router.get('/search', async (req, res) => {
+    const title = req.query.title;
+    const apiKey = 'b128af0d'
+    const omdbUrl = `https://www.omdbapi.com/?apikey=${apiKey}&t=${encodeURIComponent(title)}`;
+
+    try {
+        const response = await fetch(omdbUrl);
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({message: error.message});
     }
 })
 
