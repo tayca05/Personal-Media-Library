@@ -2,6 +2,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors'); // let the backend and frontend talk
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 // the express app creation
 const app = express();
@@ -22,6 +23,23 @@ mongoose.connect('mongodb://localhost:27017/personalmedialibrary')
 
 app.get('/', (req, res) => {
     res.send('This is Personal-Media-Library!');
+})
+
+// SEARCH
+app.get('/api/search', async (req, res) => {
+    const title = req.query.title;
+    console.log('TITLE RECEIVED:', title);
+    const apiKey = 'b128af0d'
+    const omdbUrl = `https://www.omdbapi.com/?apikey=${apiKey}&t=${title}`;
+    console.log('OMDB URL:', omdbUrl);
+
+    try {
+        const response = await fetch(omdbUrl);
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
 })
 
 const PORT = 3000;

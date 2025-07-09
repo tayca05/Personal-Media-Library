@@ -6,6 +6,9 @@
       <router-link to="/music">Music</router-link>
       <router-link to="/books">Books</router-link>
 
+      <router-link to="/search">
+        <img src="../components/image.png" alt="d">
+      </router-link>
       <router-link to="/create" class="create">Add New Media Item</router-link>
     </nav>
 
@@ -64,6 +67,11 @@ const showform = ref(false);
   width: 250px;
 
 
+}
+
+.navbar img {
+  width: 20px;
+  height: 20px;
 }
 
 h1 {
