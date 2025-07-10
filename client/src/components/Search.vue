@@ -26,10 +26,25 @@
 
         <div v-if="searchResults.length">
             <h2>Results:</h2>
-            <div v-for="result in searchResults" class="results">
-                <h2>{{ result.Title }}</h2>
-                <p>{{ result.Year }}</p>
-                <input type="checkbox" :value="result" v-model="selectedItems">
+            <div class="media-list">
+                <div v-for="result in searchResults" class="media-item">
+                    <div v-if="result.type === 'movie'" >
+                        <img :src="resolveURL(result.Poster)" alt="" class="movie-image">
+                        <h2>{{ result.Title }}</h2>
+                        <p>{{ result.Year }}</p>
+                    </div>
+                    <div v-if="result.type === 'music'">
+                        <img :src="resolveURL(result.image)" alt="" class="music-image">
+                        <h2>{{ result.title }}</h2>
+                        <p>{{ result.artist }}</p>
+                    </div>
+                    <div v-if="result.type === 'books'">
+                        <img :src="resolveURL(result.image)" alt="" class="movie-image">
+                        <h2>{{ result.title }}</h2>
+                        <p>{{ result.author_name }}</p>
+                    </div>
+                    <input type="checkbox" :value="result" v-model="selectedItems">
+                </div>
             </div>
             <button @click="saveSelectedItems" :disabled="selectedItems.length === 0">Save Item to Library</button>
         </div>
@@ -40,7 +55,7 @@
     import { ref } from 'vue';
     import router from '../router';
 
-    const apiKey = 'b128af0d';
+    const movieApiKey = 'b128af0d';
 
     const type = ref('');
     const searchQuery = ref('');
@@ -62,7 +77,7 @@
                 console.log('Searching movie: ', searchQuery);
                 await searchOMDb();
             } else if (type.value === 'music') {
-                await searchLastFM();
+                await searchDeezer();
             } else if (type.value === 'books') {
                 await searchOpenLibrary();
             } else {
@@ -76,20 +91,36 @@
     }
 
     async function searchOMDb() {
-        const url = `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchQuery.value}`;
+        const url = `https://www.omdbapi.com/?apikey=${movieApiKey}&s=${searchQuery.value}`;
         const response = await fetch(url);
         const data = await response.json();
         console.log('Raw response:', data);
         if (data.Response === "False") throw new Error(data.Error); // no response
-        searchResults.value = data.Search;
+
+        const withType = data.Search.map(item => ({
+            ...item,
+            type: 'movie'
+        }))
+
+        searchResults.value = withType;
+
     }
 
-    async function searchLastFM() {
-        const url = `https://ws.audioscrobbler.com/2.0/?method=artist.search&artist=${encodeURIComponent(searchQuery.value)}&api_key=4e46755d7f86924072fe89cf25b19c61&format=json`;
+    async function searchDeezer() {
+        const query = cleanAndFormatQuery(searchQuery.value);
+        const url = `https://itunes.apple.com/search?term=${query}&entity=song`;
         const response = await fetch(url);
         const data = await response.json();
         if (data.Response === "False") throw new Error(data.Error); // no response
-        searchResults.value = [data];
+
+        const withType = data.results.map(item => ({
+            title: item.trackName,
+            artist: item.artistName,
+            image: item.artworkUrl100.replace('100x100', '600x600'), // nicer size!
+            type: 'music'
+        }));
+
+        searchResults.value = withType;
     }
 
     async function searchOpenLibrary() {
@@ -97,32 +128,55 @@
         const response = await fetch(url);
         const data = await response.json();
         if (data.Response === "False") throw new Error(data.Error); // no response
-        searchResults.value = [data];
+
+        const withType = data.docs.map(item => ({
+            ...item, 
+            image: item.cover_i
+            ? `https://covers.openlibrary.org/b/id/${item.cover_i}-L.jpg`
+            : '',
+            type: 'books'
+        }))
+        searchResults.value = withType;
     }
 
     async function saveItem(item) {
         let imageUrl = '';
+        let title = '';
+        let genre = [];
 
-        if (type.value === 'movie') {
+        // Movie (OMDb)
+        if (item.type === 'movie') {
+            title = item.Title;
             imageUrl = item.Poster || '';
-        } else if (type.value === 'music'){
-            imageUrl = item.image?.find(img => img.size === 'large')?.['#text'] || '';
-        }
-        else if (type.value === 'books') {
-            imageUrl = item.cover_i ? `https://covers.openlibrary.org/b/id/${item.cover_i}-L.jpg` : '';
+            genre = item.Genre ? item.Genre.split(',').map(g => g.trim()) : [];
+
+        // Music (iTunes)
+        } else if (item.type === 'music') {
+            title = item.title || item.name || 'Unknown Title';
+            imageUrl = item.image ? item.image.replace('100x100', '600x600') : '';
+            genre = []; // optional — iTunes may not return genre
+
+        // Book (Open Library)
+        } else if (item.type === 'books') {
+            title = item.title;
+            imageUrl = item.cover_i
+            ? `https://covers.openlibrary.org/b/id/${item.cover_i}-L.jpg`
+            : '';
+            genre = [];
         }
 
+        // Now send it to your backend
         await fetch('http://localhost:3000/api/media', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                title: item.Title || item.name || item.title_suggest,
-                type: type.value,
-                genre: item.genre || [],
-                notes: '',
-                image: imageUrl
+            title,
+            type: type.value,
+            genre,
+            notes: '',
+            image: imageUrl
             })
-        })
+        });
     }
 
     async function saveSelectedItems() {
@@ -139,12 +193,33 @@
         selectedItems.value = []; 
         
     }
+
+    function cleanAndFormatQuery(query) {
+        return encodeURIComponent(
+            query
+            .trim()                 // Remove leading/trailing spaces
+            .replace(/\s+/g, ' ')   // Collapse multiple spaces
+            .replace(/\b\w/g, c => c.toUpperCase())  // Capitalize each word
+    );
+}
+
+    function resolveURL(url) {
+        if (!url) {
+            return '';
+        }
+
+        if (url.startsWith('http')) {
+            return url;
+        }
+
+        return `http://localhost:3000/${url}`
+    }
 </script>
 
 <style scoped>
     .search {
         border: solid;
-        border-color: #1e2a36;
+        border-color: #2c3e50;
         border-radius: 20px;
 
         padding: 2rem;
@@ -216,5 +291,13 @@
         justify-content: center;
         align-items: center;
         gap: 1rem;
+    }
+
+    .media-item h2 {
+        color: #1e2a36;
+    }
+
+    p {
+        color: #1e2a36;
     }
 </style>

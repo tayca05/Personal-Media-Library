@@ -42,6 +42,14 @@ app.get('/api/search', async (req, res) => {
     }
 })
 
+app.get('/api/deezer', async (req, res) => {
+    const query = req.query.q;
+    const deezerUrl = `https://api.deezer.com/search?q=${encodeURIComponent(query)}`;
+    const response = await fetch(deezerUrl);
+    const data = await response.json();
+    res.json(data);
+});
+
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log('Server running on http://localhost:${PORT}');

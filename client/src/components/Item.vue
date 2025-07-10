@@ -3,8 +3,11 @@
         <div v-if="error">{{ error }}</div>
         <div v-else-if="loading"><Loading class=""></Loading></div>
         <div v-else class="item">
-            <span>
-                <img :src="`http://localhost:3000/${item.image}`" alt="" class="item-image">
+            <span v-if="item.type === 'movie' || item.type === 'books'">
+                <img :src="resolveURL(item.image)" alt="" class="movie-item">
+            </span>
+            <span v-if="item.type === 'music'">
+                <img :src="resolveURL(item.image)" alt="" class="music-item">
             </span>
             <div class="item-details">
                 <div v-if="!edit" class="item-info">
@@ -107,6 +110,18 @@
     async function goBack() {
         router.push(`/${item.value.type}`); // go back to main page
     }
+
+    function resolveURL(url) {
+        if (!url) {
+            return '';
+        }
+
+        if (url.startsWith('http')) {
+            return url;
+        }
+
+        return `http://localhost:3000/${url}`
+    }
 </script>
 
 <style>
@@ -114,7 +129,7 @@
         padding: 2rem;
         margin: 2rem;
         width: 800px;
-        height: 400px;
+        height: 500px;
         padding: 1rem;
         background-color: aliceblue;
         border-radius: 20px;
@@ -126,10 +141,15 @@
         justify-content: center;
 
         max-width: 800px;
-        max-height: 400px;
+        max-height: 500px;
     }
 
-    .item-image {
+    .movie-item {
+        width: 320px;
+        height: 450px;
+    }
+
+    .music-item {
         width: 320px;
         height: 320px;
     }

@@ -5,7 +5,7 @@
     </header>
     <main>
       <section>
-        <p>Media will appear here.</p>
+        <p></p>
       </section>
     </main>
 </template>

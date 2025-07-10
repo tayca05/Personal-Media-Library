@@ -1,7 +1,15 @@
 <template>
     <div class="media-list">
         <li v-for="item in items" :key="item._id" class="media-item">
-            <img :src="`http://localhost:3000/${item.image}`" alt="" class="media-image">
+            <div v-if="item.type === 'movie'">
+                <img :src="resolveURL(item.image)" alt="" class="movie-image">
+            </div>
+            <div v-if="item.type === 'music'">
+                <img :src="resolveURL(item.image)" alt="" class="music-image">
+            </div>
+            <div v-if="item.type === 'books'">
+                <img :src="resolveURL(item.image)" alt="" class="movie-image">
+            </div>
             <div class="media-details">
                 <router-link :to="`/item/${item._id}`">
                     <h3>{{ item.title }}</h3>
@@ -17,6 +25,18 @@
     const props = defineProps({ // movie, music, books
         items: Array
     })
+
+    function resolveURL(url) {
+        if (!url) {
+            return '';
+        }
+
+        if (url.startsWith('http')) {
+            return url;
+        }
+
+        return `http://localhost:3000/${url}`
+    }
 </script>
 
 <style>
@@ -40,10 +60,20 @@
     width: 150px;
 }
 
-.media-image {
-    width: 100px;
+.movie-image {
+    width: 70px;
     height: 100px;
-    background-color: #565656;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    text-align: center;
+}
+
+.music-image {
+    width: 120px;
+    height: 120px;
     display: block;
     margin-left: auto;
     margin-right: auto;

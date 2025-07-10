@@ -20,11 +20,13 @@ const upload = multer({storage: storage});
 router.post('/', upload.single('image'), async (req, res) => {
     try {
         console.log('New media item is here.', req.body);
-        console.log('Image info: ', req.file);
+        console.log('Image info: ', req.body.image);
+
+        let imageValue = null;
 
         const itemData = {
             ...req.body,
-            image: req.file ? req.file.path : null
+            image: req.file ? req.file.path : req.body.image
         }
 
         const item = new mediaItem(itemData); // the new item created 
