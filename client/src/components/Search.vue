@@ -1,3 +1,220 @@
 <template>
-    
+    <div class="search">
+        <h1>Search for new item</h1>
+        <div class="type-row">
+                <label for="" class="type-label">Choose a media type:</label>
+                <div class="buttons">
+                    <span class="type-button">
+                        <input type="radio" name="type" value="movie" v-model="type" required>
+                        <label for="movie">Movie</label>
+                    </span>
+                    <span class="type-button">
+                        <input type="radio" name="type" value="music" v-model="type">
+                        <label for="music" >Music</label>
+                    </span>
+                    <span class="type-button">
+                        <input type="radio" name="type" value="books" v-model="type">
+                        <label for="books">Book</label>    
+                    </span>
+                </div>
+            </div>
+        <input type="text" placeholder="Search" v-model="searchQuery">
+        <button @click="search">Search</button>
+
+        <div v-if="loading">Loading...</div>
+        <div v-if="error">{{ error }}</div>
+
+        <div v-if="searchResults.length">
+            <h2>Results:</h2>
+            <div v-for="result in searchResults" class="results">
+                <h2>{{ result.Title }}</h2>
+                <p>{{ result.Year }}</p>
+                <input type="checkbox" :value="result" v-model="selectedItems">
+            </div>
+            <button @click="saveSelectedItems" :disabled="selectedItems.length === 0">Save Item to Library</button>
+        </div>
+    </div>
 </template>
+
+<script setup>
+    import { ref } from 'vue';
+    import router from '../router';
+
+    const apiKey = 'b128af0d';
+
+    const type = ref('');
+    const searchQuery = ref('');
+    const searchResults = ref([]);
+    const selectedItems = ref([]);
+    const loading = ref(false);
+    const error = ref('');
+
+    async function search() {
+        error.value = '';
+        loading.value = true;
+        searchResults.value = [];
+        
+        console.log('Search clicked');
+        console.log('Type:', type.value);
+        console.log('Query:', searchQuery.value);
+        try {
+            if (type.value === 'movie') {
+                console.log('Searching movie: ', searchQuery);
+                await searchOMDb();
+            } else if (type.value === 'music') {
+                await searchLastFM();
+            } else if (type.value === 'books') {
+                await searchOpenLibrary();
+            } else {
+                error.value = "Please choose a type.";
+            }
+        } catch (err) {
+            error.value = err.message;
+        } finally {
+            loading.value = false;
+        }
+    }
+
+    async function searchOMDb() {
+        const url = `https://www.omdbapi.com/?apikey=${apiKey}&s=${searchQuery.value}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log('Raw response:', data);
+        if (data.Response === "False") throw new Error(data.Error); // no response
+        searchResults.value = data.Search;
+    }
+
+    async function searchLastFM() {
+        const url = `https://ws.audioscrobbler.com/2.0/?method=artist.search&artist=${encodeURIComponent(searchQuery.value)}&api_key=4e46755d7f86924072fe89cf25b19c61&format=json`;
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.Response === "False") throw new Error(data.Error); // no response
+        searchResults.value = [data];
+    }
+
+    async function searchOpenLibrary() {
+        const url= `https://openlibrary.org/search.json?title=${encodeURIComponent(searchQuery.value)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.Response === "False") throw new Error(data.Error); // no response
+        searchResults.value = [data];
+    }
+
+    async function saveItem(item) {
+        let imageUrl = '';
+
+        if (type.value === 'movie') {
+            imageUrl = item.Poster || '';
+        } else if (type.value === 'music'){
+            imageUrl = item.image?.find(img => img.size === 'large')?.['#text'] || '';
+        }
+        else if (type.value === 'books') {
+            imageUrl = item.cover_i ? `https://covers.openlibrary.org/b/id/${item.cover_i}-L.jpg` : '';
+        }
+
+        await fetch('http://localhost:3000/api/media', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title: item.Title || item.name || item.title_suggest,
+                type: type.value,
+                genre: item.genre || [],
+                notes: '',
+                image: imageUrl
+            })
+        })
+    }
+
+    async function saveSelectedItems() {
+        if (selectedItems.value.length === 0) {
+            alert("Please select at least one item.");
+            return;
+        }
+
+        for (const item of selectedItems.value) {
+            await saveItem(item);
+        }
+
+        router.push(`/${type.value}`);
+        selectedItems.value = []; 
+        
+    }
+</script>
+
+<style scoped>
+    .search {
+        border: solid;
+        border-color: #1e2a36;
+        border-radius: 20px;
+
+        padding: 2rem;
+        padding-bottom: 2rem;
+        margin-top: 2rem;
+
+        
+    }
+
+    .type-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 150px;
+    }
+
+    .type-label {
+        font-weight: bold;
+    }
+
+    .type-button {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .type-button input {
+        appearance: none;
+        width: 15px;
+        height: 15px;
+        border: 2px solid #3c4e61;
+        border-radius: 50%;
+        background-color: #1e2a36; /* Default background */
+
+        display: inline-block;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .type-button input:checked {
+        background-color: #3c4e61;
+    }
+
+    .search input[type=text] {
+        padding: 10px;
+        border: none;
+        margin-right: 16px;
+        font-size: 17px;
+
+        width: 500px;
+
+        background-color: #1e2a36;
+        border-radius: 10px;
+    }
+
+    @media screen and (max-width: 600px) {
+        input[type=text] {
+            float: none;
+            display: block;
+            text-align: left;
+            width: 100%;
+            margin: 0;
+            padding: 14px;
+        }
+    }
+
+    .results {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+    }
+</style>

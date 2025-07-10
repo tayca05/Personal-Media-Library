@@ -7,6 +7,7 @@ import Books from '../components/Books.vue';
 import Create from '../components/Create.vue';
 import Search from '../components/Search.vue';
 import Item from '../components/Item.vue';
+import AdditionPage from '../components/AdditionPage.vue';
 
 const routes = [
     {path: '/', component: Main},
@@ -15,7 +16,8 @@ const routes = [
     {path: '/books', component: Books},
     {path: '/create', component: Create},
     {path: '/search', component: Search},
-    {path: '/item/:id', component: Item}
+    {path: '/item/:id', component: Item},
+    {path: '/add', component: AdditionPage}
 ]
 
 const router = createRouter({

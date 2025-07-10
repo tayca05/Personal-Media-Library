@@ -6,10 +6,7 @@
       <router-link to="/music">Music</router-link>
       <router-link to="/books">Books</router-link>
 
-      <router-link to="/search">
-        <img src="../components/image.png" alt="d">
-      </router-link>
-      <router-link to="/create" class="create">Add New Media Item</router-link>
+      <router-link to="/add" class="create">Add New Media Item</router-link>
     </nav>
 
     <router-view></router-view>

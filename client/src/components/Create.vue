@@ -1,21 +1,21 @@
 <template>
     <form @submit.prevent="submitForm" class="container">
-        <h1>Create a new media item.</h1>
+        <h1>Create a new media item</h1>
         <div class="type-row">
             <label for="" class="type-label">Choose a media type:</label>
             <div class="buttons">
-                <span class="type-button">
-                    <input type="radio" name="type" value="movie" v-model="type" required>
-                    <label for="movie">Movie</label>
-                </span>
-                <span class="type-button">
-                    <input type="radio" name="type" value="music" v-model="type">
-                    <label for="music" >Music</label>
-                </span>
-                <span class="type-button">
-                    <input type="radio" name="type" value="books" v-model="type">
-                    <label for="books">Book</label>    
-                </span>
+                <label class="type-button">
+                    <input class="custom-radio" type="radio" name="type" value="movie" v-model="type" required>
+                    Movie
+                </label>
+                <label class="type-button">
+                    <input class="custom-radio" type="radio" name="type" value="music" v-model="type">
+                    Music
+                </label>
+                <label class="type-button">
+                    <input class="custom-radio" type="radio" name="type" value="books" v-model="type">
+                    Book  
+                </label>
             </div>
         </div>
         <div class="row">
@@ -121,21 +121,45 @@
         border-radius: 5px;
     }
 
+    .type-label {
+        text-align: left;
+    }
+
     .type-row {
-        margin-top: 2rem;
-        margin-bottom: 3rem;
         display: flex;
-        align-items: center;
         justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        margin-top: 2rem;
     }
 
     .buttons {
-        display: flex;                 
-        gap: 89px;
+        display: flex;   
+        justify-content: center;
+        align-items: center;              
+        gap: 4rem;
     }
 
-    .type-button input {
-        color: aliceblue;
+    .type-button {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .custom-radio {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        width: 15px;
+        height: 15px;
+        border: 2px solid #3c4e61;
+        border-radius: 50%;
+        background-color: #1e2a36; /* Default background */
+
+    }
+
+    .custom-radio:checked {
+        background-color: #3c4e61;
     }
 
     #notes {
