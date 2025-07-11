@@ -26,6 +26,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 
         const itemData = {
             ...req.body,
+            rating: req.body.rating ? req.body.rating : null,
             image: req.file ? req.file.path : req.body.image
         }
 

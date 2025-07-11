@@ -57,12 +57,12 @@
     margin-bottom: 1rem;
     border-radius: 8px;
     text-align: center;
-    width: 150px;
+    width: 180px;
 }
 
 .movie-image {
-    width: 70px;
-    height: 100px;
+    width: 195px;
+    height: 300px;
     display: block;
     margin-left: auto;
     margin-right: auto;
@@ -89,7 +89,7 @@
 
 .media-details h3 {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 0.9rem;
     color: #333;
 }
 

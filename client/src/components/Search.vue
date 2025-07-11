@@ -1,25 +1,29 @@
 <template>
     <div class="search">
         <h1>Search for new item</h1>
-        <div class="type-row">
-                <label for="" class="type-label">Choose a media type:</label>
-                <div class="buttons">
-                    <span class="type-button">
-                        <input type="radio" name="type" value="movie" v-model="type" required>
-                        <label for="movie">Movie</label>
-                    </span>
-                    <span class="type-button">
-                        <input type="radio" name="type" value="music" v-model="type">
-                        <label for="music" >Music</label>
-                    </span>
-                    <span class="type-button">
-                        <input type="radio" name="type" value="books" v-model="type">
-                        <label for="books">Book</label>    
-                    </span>
+        <div class="search-section">
+            <div class="type-row">
+                    <label for="" class="type-label">Choose a media type:</label>
+                    <div class="buttons">
+                        <span class="type-button">
+                            <input type="radio" name="type" value="movie" v-model="type" required>
+                            <label for="movie">Movie</label>
+                        </span>
+                        <span class="type-button">
+                            <input type="radio" name="type" value="music" v-model="type">
+                            <label for="music" >Music</label>
+                        </span>
+                        <span class="type-button">
+                            <input type="radio" name="type" value="books" v-model="type">
+                            <label for="books">Book</label>    
+                        </span>
+                    </div>
                 </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search" v-model="searchQuery">
+                <button @click="search">Search</button>
             </div>
-        <input type="text" placeholder="Search" v-model="searchQuery">
-        <button @click="search">Search</button>
+        </div>
 
         <div v-if="loading">Loading...</div>
         <div v-if="error">{{ error }}</div>
@@ -143,6 +147,7 @@
         let imageUrl = '';
         let title = '';
         let genre = [];
+        let rating = '';
 
         // Movie (OMDb)
         if (item.type === 'movie') {
@@ -174,6 +179,7 @@
             type: type.value,
             genre,
             notes: '',
+            rating,
             image: imageUrl
             })
         });
@@ -225,10 +231,16 @@
         padding: 2rem;
         padding-bottom: 2rem;
         margin-top: 2rem;
-
-        
     }
 
+    .search-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        padding: 2rem;
+    }
+    
     .type-row {
         display: flex;
         justify-content: center;
